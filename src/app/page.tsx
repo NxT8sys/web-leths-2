@@ -171,7 +171,7 @@ export default function Home() {
       {/* NAVBAR */}
       <nav className="fixed top-0 w-full bg-black/90 backdrop-blur-md z-50 border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="font-black uppercase tracking-widest text-lg">Leth's Train</div>
+          <div className="font-black uppercase tracking-widest text-lg">Leth's Muay Thai Gym</div>
           <div className="hidden md:flex gap-8 text-xs uppercase tracking-widest text-gray-400">
             <a href="#lessen" className="hover:text-white transition">{t.nav.classes}</a>
             <a href="#proces" className="hover:text-white transition">{t.nav.process}</a>
