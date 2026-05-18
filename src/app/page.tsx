@@ -188,18 +188,22 @@ export default function Home() {
 
       {/* HERO */}
       <section className="relative h-screen flex items-center justify-center text-center pt-20">
-        <div className="absolute inset-0 bg-cover bg-top bg-no-repeat grayscale opacity-40" style={{ backgroundImage: "url('/ring.png')" }} />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-        <div className="relative z-10 px-6 max-w-4xl mx-auto">
-          <p className="text-xs tracking-[0.3em] text-gray-400 mb-4 uppercase">{t.hero.subtitle}</p>
-          <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tight leading-none mb-6">{t.hero.title}</h1>
-          <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10">{t.hero.desc}</p>
-          <a href="#tarieven" className="inline-block bg-white text-black font-bold py-4 px-8 text-lg uppercase tracking-widest hover:bg-gray-200 transition">
-            {t.hero.cta}
-          </a>
-        </div>
-      </section>
-
+  <Image 
+    src="/ring.png" 
+    alt="Leths Muay Thai Gym" 
+    fill 
+    className="absolute inset-0 object-cover object-top grayscale opacity-40" 
+  />
+  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+  <div className="relative z-10 px-6 max-w-4xl mx-auto">
+    <p className="text-xs tracking-[0.3em] text-gray-400 mb-4 uppercase">{t.hero.subtitle}</p>
+    <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tight leading-none mb-6">{t.hero.title}</h1>
+    <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10">{t.hero.desc}</p>
+    <a href="#tarieven" className="inline-block bg-white text-black font-bold py-4 px-8 text-lg uppercase tracking-widest hover:bg-gray-200 transition">
+      {t.hero.cta}
+    </a>
+  </div>
+</section>
       {/* CLASES (ACORDEÓN) */}
       <section id="lessen" className="py-24 px-6 border-t border-gray-800">
         <div className="max-w-4xl mx-auto">
