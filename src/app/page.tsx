@@ -55,7 +55,7 @@ function HeroSection() {
       <motion.div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-110"
         style={{
-          backgroundImage: "url('/hero-gym.jpg')",
+          backgroundImage: "url('/gym.png')",
           y: imageY,
         }}
       />
