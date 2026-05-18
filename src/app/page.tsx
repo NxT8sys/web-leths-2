@@ -187,13 +187,8 @@ export default function Home() {
       </nav>
 
       {/* HERO */}
-      <section className="relative h-screen flex items-center justify-center text-center pt-20">
-  <Image 
-    src="/ring.png" 
-    alt="Leths Muay Thai Gym" 
-    fill 
-    className="absolute inset-0 object-cover object-top grayscale opacity-40" 
-  />
+ <section className="relative h-screen flex items-center justify-center text-center pt-20">
+  <img src="/ring.png" className="absolute inset-0 w-full h-full object-cover object-top grayscale opacity-40" alt="Gym" />
   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
   <div className="relative z-10 px-6 max-w-4xl mx-auto">
     <p className="text-xs tracking-[0.3em] text-gray-400 mb-4 uppercase">{t.hero.subtitle}</p>
