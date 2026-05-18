@@ -187,7 +187,7 @@ export default function Home() {
 
       {/* HERO */}
       <section className="relative h-screen flex items-center justify-center text-center pt-20">
-        <div className="absolute inset-0 bg-cover bg-top bg-no-repeat grayscale opacity-40" style={{ backgroundImage: "url('/gym.png')" }} />
+        <div className="absolute inset-0 bg-cover bg-top bg-no-repeat grayscale opacity-40" style={{ backgroundImage: "url('/ring.png')" }} />
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
         <div className="relative z-10 px-6 max-w-4xl mx-auto">
           <p className="text-xs tracking-[0.3em] text-gray-400 mb-4 uppercase">{t.hero.subtitle}</p>
