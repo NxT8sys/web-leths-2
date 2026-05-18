@@ -1,441 +1,362 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { useState } from "react";
 
-/* ───────────────────────────────────────────────
-   Animation variants
-   ─────────────────────────────────────────────── */
-const fadeUp = {
-  hidden: { opacity: 0, y: 40 },
-  visible: (delay: number = 0) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.9, ease: [0.25, 0.4, 0.25, 1], delay },
-  }),
-};
-
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: (delay: number = 0) => ({
-    opacity: 1,
-    transition: { duration: 1.2, ease: "easeOut", delay },
-  }),
-};
-
-const lineReveal = {
-  hidden: { scaleX: 0 },
-  visible: {
-    scaleX: 1,
-    transition: { duration: 0.8, ease: [0.25, 0.4, 0.25, 1] },
+// --- TRADUCCIONES ---
+const content = {
+  nl: {
+    nav: { classes: "Lessen", process: "Proces", about: "Over Ons", pricing: "Tarieven", faq: "FAQ" },
+    hero: {
+      subtitle: "Amsterdam",
+      title: "DE Muay Thai Gym",
+      desc: "Van geoefend vechters tot beginners. Groot, klein, fors, minder fors, oud, jong: het is de ideale manier om fit te worden en te blijven.",
+      cta: "Boek een proefles"
+    },
+    classes: {
+      title: "Onze Lessen",
+      desc: "Leth’s Muay Thai gym biedt verschillende lessen per dag zodat er altijd een mogelijkheid is om te werken aan jouw doelstellingen.",
+      fundamentals: { title: "Muay Thai Fundamentals", desc: "Deze les is speciaal ontwikkeld voor beginners en nieuwe sporters in de gym. Elke week staat er een andere fundamentele Muay Thai-techniek centraal. Binnen 4 weken komen alle 8 wapens (de “8 Limbs”) aan bod. Je leert daarnaast werken met ritme, afstand en timing. Conditietraining maakt deel uit van de les en word gedaan op de heavy bag maar de nadruk ligt vooral op herhaling en het beheersen van de basis." },
+      pads: { title: "Fundamental Pads", desc: "This class is designed to teach the essential skills of holding pads correctly and safely. Students will learn proper stance, timing, and technique to ensure both training partners get the most out of pad work. *Verplicht: scheenbeschermers, handschoenen en Muay Thai shorts." },
+      kids: { title: "Kinderen (10-16 jaar)", desc: "Tijdens deze lessen leren we de jeugd de basis en technieken van het Muay Thai. De trainingen bevorderen niet alleen het fysieke maar ook zelfvertrouwen, discipline en respect. *Benodigdheden: Bokshandschoenen, scheenbeschermers en Muay Thai shorts." },
+      bag: { title: "Zaktraining", desc: "Tijdens deze les worden technieken uit het Muay Thai beoefend op de heavy bag. Een conditioneel zware les met veel aandacht voor de basis alsmede gevorderde technieken. Je dient voor deze les zelf bokshandschoenen mee te nemen. Bandages zijn niet verplicht maar wel aan te raden." },
+      all: { title: "Muay Thai 4 All", desc: "In deze les train je samen met een partner en ligt de nadruk op het correct uitvoeren van basistechnieken. Onder begeleiding van de Kru worden realistische gevechtssituaties nagebootst. Om deel te nemen is het verplicht dat je de voorgaande lessen hebt gevolgd. *Benodigdheden: eigen bokshandschoenen, scheenbeschermers en Muay Thai shorts." },
+      advanced: { title: "Muay Thai Advanced", desc: "In deze les werk je samen met een partner aan geavanceerde Muay Thai-technieken. Deelname is alleen mogelijk nadat je de lessen Muay Thai 4 All hebt gevolgd en de Kru je akkoord heeft gegeven. *Benodigdheden: eigen bokshandschoenen, scheenbeschermers en Muay Thai shorts." },
+      sparring: { title: "Sparren & Clinchen", desc: "Tijdens deze les worden technieken geoefend samen met een partner. Je wordt gevraagd op ongeveer 60% van je maximale intensiteit te trainen, de focus ligt hier volledig op techniek. *Aan deze lessen kun je alleen deelnemen met toestemming van de kru. Benodigdheden: handschoenen, bitje, toque, ellenboog en scheenbescherming." },
+      open: { title: "Open Gym", desc: "Tijdens deze les is het mogelijk om aan je kracht/conditie te werken op eigen tempo. Je werkt puur voor jezelf en natuurlijk is er iemand aanwezig mocht je vragen hebben. Inschrijven via de Eversport app." },
+      pt: { title: "Personal & Corporate Training", desc: "Eén op één training of samen met je collega’s. Samen bepalen we jouw doelstellingen en creëren we een plan. Interesse? Maak een afspraak via het contactformulier of bel ons." }
+    },
+    process: {
+      title: "Trust The Process",
+      desc: "Iedereen die nieuw binnenkomt start bij stap 1!",
+      step1: { title: "1. Fundamentals", desc: "Leer hoe je de 8 ledematen correct gebruikt met de juiste techniek, afstand en timing." },
+      step2: { title: "2. Fundamental Pads", desc: "Voordat je verder gaat met pads, leren we je hoe je pads correct vasthoudt." },
+      step3: { title: "3. Muay Thai 4 All", desc: "Train met partners van verschillende niveaus. Nadruk op de juiste basistechnieken." },
+      step4: { title: "4. Kicking Sparren", desc: "Je komt dichter bij het echte gevecht, maar hoeft je nog geen zorgen te maken over alle wapens." },
+      step5: { title: "5. Advanced", desc: "Ga dieper in op geavanceerde technieken, conditioneel sterker worden en combinaties op hoger niveau." },
+      step6: { title: "6. Sparren & Clinchen", desc: "Tijd om alles samen te voegen. Zelfbeheersing en geen ego zijn belangrijk." }
+    },
+    about: {
+      title: "Over Kru Robert",
+      p1: "Robert de Leth was achttien toen hij koos voor de vechtsport. Na jarenlang trainen in Amsterdam, bracht het hem naar Thailand waar hij jaren woonde en trainde bij Sityodtong, Pattaya.",
+      p2: "In 2015 keerde Robert terug naar Thailand en hervond hij niet alleen zijn liefde voor Muay Thai, maar ook zijn vrouw Wanida. Omdat de nadruk bij Nederlandse gyms vaak op kickboksen ligt, begon het idee voor een eigen authentieke Muay Thai gym.",
+      p3: "Na een succesvolle zomer aan de Amstel, was het tijd voor de volgende stap: een eigen gym aan het water op het NDSM. De droom kwam uit. Muay Thai is voor iedereen."
+    },
+    facilities: {
+      title: "Faciliteiten",
+      size: "335m2 Gym",
+      sizeDesc: "Officiele wedstrijd ring plus 18 Fairtex bokszakken.",
+      strength: "Strength & Conditioning",
+      strengthDesc: "Squat rack, dumbells, GHD en verschillende apparaten.",
+      bar: "Bar & Keuken",
+      barDesc: "Dranken, koffie, energy repen en Wanida’s huisgemaakte bananencake. Meerdere keren per week authentieke Thaise maaltijden."
+    },
+    pricing: {
+      title: "Tarieven",
+      trial: "Proefpakket",
+      trialDesc: "3 trainingen (alleen voor Fundamentals)",
+      trialPrice: "€25",
+      unlimited: "Unlimited",
+      unlimitedPt: "Unlimited + 1 PT/maand",
+      week2: "2x per week",
+      week3: "3x per week",
+      month: "Maandelijks opzegbaar",
+      months6: "6 maanden",
+      months12: "12 maanden"
+    },
+    faq: {
+      title: "FAQ",
+      q1: { q: "Wat is Muay Thai?", a: "Muay Thai is een traditionele Thaise vechtsport, ook wel bekend als “The Art of Eight Limbs”. Er wordt gebruikgemaakt van stoten, trappen, knieën en ellebogen." },
+      q2: { q: "Is Muay Thai geschikt voor beginners?", a: "Ja, absoluut. Beginners starten met de fundamentals en bouwen stap voor stap techniek, conditie en zelfvertrouwen op." },
+      q3: { q: "Heb ik eigen spullen nodig voor een proefles?", a: "Nee. Tijdens een proefles kun je spullen lenen van de gym. Word je lid? Dan heb je eigen handschoenen, scheenbeschermers en shorts nodig." },
+      q4: { q: "Moet ik in goede conditie zijn om te starten?", a: "Nee. Je bouwt conditie vanzelf op tijdens de trainingen. Iedereen traint op zijn of haar eigen tempo." }
+    },
+    footer: {
+      hours: "Openingstijden",
+      hoursDesc: "Ma - Za: 07:30 - 20:00 | Zondag: GESLOTEN",
+      location: "Locatie",
+      address: "Ms. van Riemsdijkweg 59, 1033 RC Amsterdam",
+      parking: "Parkeertarief: €1,60 per uur. Ruime parkeergelegenheid voor de deur."
+    }
   },
+  en: {
+    nav: { classes: "Classes", process: "Process", about: "About Us", pricing: "Pricing", faq: "FAQ" },
+    hero: {
+      subtitle: "Amsterdam",
+      title: "DE Muay Thai Gym",
+      desc: "From experienced fighters to beginners. Big, small, heavy, light, old, young: it is the ideal way to get and stay fit.",
+      cta: "Book a Trial"
+    },
+    classes: {
+      title: "Our Classes",
+      desc: "Leth’s offers different classes every day so there is always an option to work on your goals.",
+      fundamentals: { title: "Muay Thai Fundamentals", desc: "Specially developed for beginners. Each week focuses on a different fundamental technique. Within 4 weeks, all 8 weapons (the '8 Limbs') are covered. You also learn rhythm, distance, and timing." },
+      pads: { title: "Fundamental Pads", desc: "Designed to teach the essential skills of holding pads correctly and safely. *Mandatory: shinguards, gloves, and Muay Thai shorts." },
+      kids: { title: "Youth (10-16 yrs)", desc: "Teaching the youth the basics and techniques of Muay Thai. Promoting physical fitness, self-confidence, discipline, and respect. *Required: Gloves, shinguards, and shorts." },
+      bag: { title: "Bag Training", desc: "Techniques practiced on the heavy bag. A physically demanding class with attention to both basic and advanced techniques. Bring your own gloves. Hand wraps recommended." },
+      all: { title: "Muay Thai 4 All", desc: "Partner training focusing on correct basic techniques. Realistic fight situations simulated under Kru's guidance. Previous classes are mandatory to participate. *Required: own gloves, shinguards, shorts." },
+      advanced: { title: "Muay Thai Advanced", desc: "Advanced techniques with a partner. Participation only after completing Muay Thai 4 All and with Kru's approval. *Required: own gloves, shinguards, shorts." },
+      sparring: { title: "Sparring & Clinching", desc: "Practicing techniques with a partner at ~60% intensity. Focus is entirely on technique, not causing damage. *Requires Kru's permission. Required: gloves, mouthguard, headgear, elbow pads, shinguards." },
+      open: { title: "Open Gym", desc: "Work on your strength/conditioning at your own pace. A trainer is present for questions. Reserve via the Eversports app." },
+      pt: { title: "Personal & Corporate Training", desc: "1-on-1 or with colleagues. We determine your goals and create a plan. Interested? Make an appointment via the contact form or call us." }
+    },
+    process: {
+      title: "Trust The Process",
+      desc: "Everyone new starts at step 1!",
+      step1: { title: "1. Fundamentals", desc: "Learn how to use the 8 limbs correctly with proper technique, distance, and timing." },
+      step2: { title: "2. Fundamental Pads", desc: "Before moving on to pads, we teach you how to hold pads correctly for all techniques." },
+      step3: { title: "3. Muay Thai 4 All", desc: "Train with partners of different levels. Emphasis on correct basic techniques." },
+      step4: { title: "4. Kicking Sparring", desc: "Closer to a real fight, but no need to worry about all weapons yet." },
+      step5: { title: "5. Advanced", desc: "Go deeper into advanced techniques, get stronger, and apply combinations at a higher level." },
+      step6: { title: "6. Sparring & Clinching", desc: "Time to put it all together. Self-control and no ego are key." }
+    },
+    about: {
+      title: "About Kru Robert",
+      p1: "Robert de Leth chose combat sports at eighteen. After training in Amsterdam for years, he traveled to Thailand where he lived and trained at Sityodtong, Pattaya.",
+      p2: "In 2015, Robert returned to Thailand and rediscovered not only his love for Muay Thai, but also his wife Wanida. Because Dutch gyms often focus on kickboxing, the idea for an authentic Muay Thai gym began to form.",
+      p3: "After a successful summer by the Amstel river, it was time for the next step: his own gym on the water at NDSM. The dream came true. Muay Thai is for everyone."
+    },
+    facilities: {
+      title: "Facilities",
+      size: "335m2 Gym",
+      sizeDesc: "Official competition ring plus 18 Fairtex heavy bags.",
+      strength: "Strength & Conditioning",
+      strengthDesc: "Squat rack, dumbbells, GHD, and various conditioning equipment.",
+      bar: "Bar & Kitchen",
+      barDesc: "Drinks, coffee, energy bars, and Wanida’s homemade banana cake. Authentic Thai meals available several evenings a week."
+    },
+    pricing: {
+      title: "Pricing",
+      trial: "Trial Package",
+      trialDesc: "3 sessions (Fundamentals only)",
+      trialPrice: "€25",
+      unlimited: "Unlimited",
+      unlimitedPt: "Unlimited + 1 PT/month",
+      week2: "2x per week",
+      week3: "3x per week",
+      month: "Monthly cancelable",
+      months6: "6 months",
+      months12: "12 months"
+    },
+    faq: {
+      title: "FAQ",
+      q1: { q: "What is Muay Thai?", a: "Muay Thai is a traditional Thai martial art, also known as 'The Art of Eight Limbs'. It uses punches, kicks, knees, and elbows." },
+      q2: { q: "Is Muay Thai suitable for beginners?", a: "Yes, absolutely. Beginners start with the fundamentals and build technique, conditioning, and confidence step by step." },
+      q3: { q: "Do I need my own gear for a trial class?", a: "No. You can borrow gear for a trial class. Becoming a member? Then you need your own gloves, shinguards, and shorts." },
+      q4: { q: "Do I need to be in good shape to start?", a: "No. You build conditioning automatically during training. Everyone trains at their own pace." }
+    },
+    footer: {
+      hours: "Opening Hours",
+      hoursDesc: "Mon - Sat: 07:30 - 20:00 | Sunday: CLOSED",
+      location: "Location",
+      address: "Ms. van Riemsdijkweg 59, 1033 RC Amsterdam",
+      parking: "Parking: €1.60/hour. Ample parking space in front of the door."
+    }
+  }
 };
 
-/* ───────────────────────────────────────────────
-   HERO SECTION
-   ─────────────────────────────────────────────── */
-function HeroSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end start"],
-  });
-  const imageY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const overlayOpacity = useTransform(scrollYProgress, [0, 0.5], [0.6, 0.85]);
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.4], [1, 0]);
+export default function Home() {
+  const [lang, setLang] = useState<"nl" | "en">("nl");
+  const [openClass, setOpenClass] = useState<string | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const t = content[lang];
+
+  const toggleClass = (cls: string) => setOpenClass(openClass === cls ? null : cls);
+  const toggleFaq = (idx: number) => setOpenFaq(openFaq === idx ? null : idx);
+
+  const classKeys = ["fundamentals", "pads", "kids", "bag", "all", "advanced", "sparring", "open", "pt"] as const;
 
   return (
-    <section
-      ref={sectionRef}
-      id="hero"
-      className="relative h-screen w-full flex items-center overflow-hidden"
-    >
-      {/* Parallax background image */}
-      <motion.div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-110"
-        style={{
-          backgroundImage: "url('/gym.png')",
-          y: imageY,
-        }}
-      />
-      {/* Dynamic overlay */}
-      <motion.div
-        className="absolute inset-0 bg-black"
-        style={{ opacity: overlayOpacity }}
-      />
-
-      {/* Content — left-aligned */}
-      <motion.div
-        className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-16"
-        style={{ opacity: contentOpacity }}
-      >
-        <motion.p
-          custom={0}
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          className="text-[#A0A0A0] text-sm tracking-[0.3em] uppercase mb-4 font-light"
-        >
-          Amsterdam
-        </motion.p>
-
-        <motion.h1
-          initial="hidden"
-          animate="visible"
-          className="text-white leading-[0.9] uppercase tracking-wide"
-        >
-          <motion.span
-            custom={0.15}
-            variants={fadeUp}
-            className="block text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold"
-          >
-            Real
-          </motion.span>
-          <motion.span
-            custom={0.3}
-            variants={fadeUp}
-            className="block text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold"
-          >
-            Muay Thai
-          </motion.span>
-        </motion.h1>
-
-        <motion.p
-          custom={0.5}
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          className="text-[#A0A0A0] text-base sm:text-lg mt-6 max-w-md font-light leading-relaxed"
-        >
-          The art of 8 limbs. From beginners to fighters.
-        </motion.p>
-
-        <motion.div
-          custom={0.7}
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-wrap gap-4 mt-10"
-        >
-          <a
-            href="#pricing"
-            className="inline-flex items-center justify-center border border-white text-white text-sm tracking-[0.15em] uppercase px-8 py-4 hover:bg-white hover:text-black transition-all duration-300"
-          >
-            Book Trial Session
-          </a>
-          <a
-            href="#training"
-            className="inline-flex items-center gap-2 text-white text-sm tracking-[0.15em] uppercase px-4 py-4 hover:opacity-70 transition-opacity duration-300 group"
-          >
-            View Schedule
-            <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-          </a>
-        </motion.div>
-      </motion.div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
-      >
-        <span className="text-[#A0A0A0] text-xs tracking-[0.2em] uppercase">
-          Scroll
-        </span>
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          className="w-px h-8 bg-[#A0A0A0]/40"
-        />
-      </motion.div>
-    </section>
-  );
-}
-
-/* ───────────────────────────────────────────────
-   KRU ROBERT SECTION
-   ─────────────────────────────────────────────── */
-function KruRobertSection() {
-  return (
-    <section
-      id="about"
-      className="relative h-screen w-full flex"
-    >
-      <div className="flex flex-col lg:flex-row w-full h-full">
-        {/* Photo — left half */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
-          className="relative w-full lg:w-1/2 h-1/2 lg:h-full overflow-hidden"
-        >
-          <div
-            className="absolute inset-0 bg-cover bg-top bg-no-repeat grayscale"
-            style={{ backgroundImage: "url('/kru.png')" }}
-          />
-          <div className="absolute inset-0 bg-black/20" />
-        </motion.div>
-
-        {/* Text — right half */}
-        <div className="w-full lg:w-1/2 h-1/2 lg:h-full bg-black flex items-center px-8 sm:px-12 lg:px-20">
-          <div className="max-w-lg">
-            <motion.p
-              custom={0}
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.3 }}
-              className="text-[#A0A0A0] text-sm tracking-[0.3em] uppercase mb-6 font-light"
-            >
-              About
-            </motion.p>
-            <motion.h2
-              custom={0.1}
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.3 }}
-              className="text-white text-4xl sm:text-5xl md:text-6xl font-bold uppercase tracking-wide leading-tight"
-            >
-              Kru Robert
-            </motion.h2>
-            <motion.div
-              variants={lineReveal}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.3 }}
-              className="w-12 h-px bg-[#A0A0A0] mt-8 mb-8 origin-left"
-            />
-            <motion.p
-              custom={0.3}
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.3 }}
-              className="text-[#A0A0A0] text-base sm:text-lg leading-relaxed font-light"
-            >
-              Authentic Muay Thai discipline. No shortcuts. Whether you are
-              stepping into the ring for the first time or preparing for a fight,
-              this is your evolution.
-            </motion.p>
+    <main className="bg-black text-white font-sans overflow-x-hidden">
+      
+      {/* NAVBAR */}
+      <nav className="fixed top-0 w-full bg-black/90 backdrop-blur-md z-50 border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="font-black uppercase tracking-widest text-lg">Leth's Train</div>
+          <div className="hidden md:flex gap-8 text-xs uppercase tracking-widest text-gray-400">
+            <a href="#lessen" className="hover:text-white transition">{t.nav.classes}</a>
+            <a href="#proces" className="hover:text-white transition">{t.nav.process}</a>
+            <a href="#over" className="hover:text-white transition">{t.nav.about}</a>
+            <a href="#tarieven" className="hover:text-white transition">{t.nav.pricing}</a>
+            <a href="#faq" className="hover:text-white transition">{t.nav.faq}</a>
           </div>
+          <button onClick={() => setLang(lang === "nl" ? "en" : "nl")} className="border border-gray-600 px-3 py-1 text-xs uppercase tracking-widest hover:bg-white hover:text-black transition">
+            {lang === "nl" ? "EN" : "NL"}
+          </button>
         </div>
-      </div>
-    </section>
-  );
-}
+      </nav>
 
-/* ───────────────────────────────────────────────
-   CLASSES SECTION
-   ─────────────────────────────────────────────── */
-const CLASSES = [
-  {
-    name: "Fundamentals",
-    level: "All levels",
-    detail: "Punches, Kicks, Knees, Elbows",
-  },
-  { name: "Drills & Heavy Bag", level: "All levels", detail: "" },
-  {
-    name: "Sparring & Clinching",
-    level: "Intermediate / Advanced",
-    detail: "",
-  },
-  { name: "Strength & Conditioning", level: "All levels", detail: "" },
-  { name: "Youth Muay Thai", level: "10–16 yrs", detail: "" },
-];
+      {/* HERO */}
+      <section className="relative h-screen flex items-center justify-center text-center pt-20">
+        <div className="absolute inset-0 bg-cover bg-top bg-no-repeat grayscale opacity-40" style={{ backgroundImage: "url('/hero-gym.jpg')" }} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+        <div className="relative z-10 px-6 max-w-4xl mx-auto">
+          <p className="text-xs tracking-[0.3em] text-gray-400 mb-4 uppercase">{t.hero.subtitle}</p>
+          <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tight leading-none mb-6">{t.hero.title}</h1>
+          <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10">{t.hero.desc}</p>
+          <a href="#tarieven" className="inline-block bg-white text-black font-bold py-4 px-8 text-lg uppercase tracking-widest hover:bg-gray-200 transition">
+            {t.hero.cta}
+          </a>
+        </div>
+      </section>
 
-function ClassesSection() {
-  return (
-    <section
-      id="training"
-      className="h-screen w-full bg-black flex items-center"
-    >
-      <div className="w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 flex flex-col lg:flex-row gap-12 lg:gap-0">
-        {/* Title — left */}
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.9, ease: [0.25, 0.4, 0.25, 1] }}
-          className="lg:w-2/5 flex items-start lg:items-center"
-        >
-          <h2 className="text-white text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold uppercase tracking-wide leading-none">
-            Training
-          </h2>
-        </motion.div>
-
-        {/* List — right */}
-        <div className="lg:w-3/5 flex flex-col">
-          {CLASSES.map((cls, i) => (
-            <motion.div
-              key={cls.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{
-                duration: 0.6,
-                ease: "easeOut",
-                delay: i * 0.08,
-              }}
-              className={`group py-5 sm:py-6 border-t border-[#A0A0A0]/20 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4 cursor-default hover:border-[#A0A0A0]/40 transition-colors duration-300 ${
-                i === CLASSES.length - 1
-                  ? "border-b border-[#A0A0A0]/20 hover:border-b-[#A0A0A0]/40"
-                  : ""
-              }`}
-            >
-              <div className="flex items-baseline gap-3">
-                <span className="text-white text-lg sm:text-xl tracking-[0.1em] uppercase font-light group-hover:tracking-[0.15em] transition-all duration-300">
-                  {cls.name}
-                </span>
-                {cls.detail && (
-                  <span className="hidden md:inline text-[#A0A0A0]/50 text-sm font-light">
-                    — {cls.detail}
-                  </span>
+      {/* CLASES (ACORDEÓN) */}
+      <section id="lessen" className="py-24 px-6 border-t border-gray-800">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-5xl md:text-6xl font-black uppercase leading-none mb-4">{t.classes.title}</h2>
+          <p className="text-gray-400 text-lg mb-12">{t.classes.desc}</p>
+          
+          <div className="space-y-4">
+            {classKeys.map((key) => (
+              <div key={key} className="border-b border-gray-800">
+                <button onClick={() => toggleClass(key)} className="w-full flex justify-between items-center py-6 text-left hover:pl-2 transition-all">
+                  <h3 className="text-2xl font-bold uppercase">{t.classes[key].title}</h3>
+                  <span className="text-2xl text-gray-500">{openClass === key ? '−' : '+'}</span>
+                </button>
+                {openClass === key && (
+                  <div className="pb-6 text-gray-400 leading-relaxed whitespace-pre-line">
+                    {t.classes[key].desc}
+                  </div>
                 )}
               </div>
-              <span className="text-[#A0A0A0] text-sm tracking-[0.1em] uppercase font-light whitespace-nowrap">
-                {cls.level}
-              </span>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
-  );
-}
+      </section>
 
-/* ───────────────────────────────────────────────
-   PRICING SECTION
-   ─────────────────────────────────────────────── */
-const PLANS = [
-  {
-    name: "2x A Week",
-    price: "€75",
-    period: "/ month",
-    featured: false,
-    sub: "",
-  },
-  {
-    name: "Unlimited",
-    price: "€95",
-    period: "/ month",
-    featured: true,
-    sub: "12mo: €90/mo",
-  },
-  {
-    name: "3x A Week",
-    price: "€85",
-    period: "/ month",
-    featured: false,
-    sub: "",
-  },
-];
+      {/* TRUST THE PROCESS */}
+      <section id="proces" className="py-24 px-6 bg-zinc-950 border-t border-gray-800">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-5xl md:text-6xl font-black uppercase leading-none mb-4">{t.process.title}</h2>
+          <p className="text-gray-400 text-lg mb-16">{t.process.desc}</p>
+          <div className="grid md:grid-cols-3 gap-8 text-left">
+            {Array.from({length: 6}).map((_, i) => (
+              <div key={i} className="border border-gray-800 p-6 hover:border-gray-500 transition">
+                <h3 className="text-xl font-bold uppercase mb-3">{t.process[`step${i+1}` as keyof typeof t.process].title}</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">{t.process[`step${i+1}` as keyof typeof t.process].desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-function PricingSection() {
-  return (
-    <section
-      id="pricing"
-      className="h-screen w-full bg-black flex items-center"
-    >
-      <div className="w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-16">
-        <motion.h2
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.9, ease: [0.25, 0.4, 0.25, 1] }}
-          className="text-white text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold uppercase tracking-wide mb-16 sm:mb-20"
-        >
-          Pricing
-        </motion.h2>
+      {/* OVER ONS */}
+      <section id="over" className="py-24 px-6 border-t border-gray-800">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+          <div className="relative h-[500px] w-full overflow-hidden">
+            <div className="absolute inset-0 bg-cover bg-top bg-no-repeat grayscale" style={{ backgroundImage: "url('/kru.png')" }} />
+            <div className="absolute inset-0 bg-black/20" />
+          </div>
+          <div>
+            <h2 className="text-5xl font-black uppercase mb-6">{t.about.title}</h2>
+            <p className="text-gray-400 text-lg leading-relaxed mb-4">{t.about.p1}</p>
+            <p className="text-gray-400 text-lg leading-relaxed mb-4">{t.about.p2}</p>
+            <p className="text-gray-400 text-lg leading-relaxed">{t.about.p3}</p>
+          </div>
+        </div>
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
-          {PLANS.map((plan, i) => (
-            <motion.div
-              key={plan.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{
-                duration: 0.7,
-                ease: "easeOut",
-                delay: i * 0.12,
-              }}
-              className={`group flex flex-col items-center text-center py-10 sm:py-12 px-6 transition-colors duration-300 ${
-                plan.featured
-                  ? "border-b-2 border-white"
-                  : "border-b border-[#A0A0A0]/20"
-              }`}
-            >
-              <p className="text-[#A0A0A0] text-sm tracking-[0.2em] uppercase mb-6 font-light">
-                {plan.name}
-              </p>
-              <p className="text-white text-6xl sm:text-7xl font-bold tracking-tight">
-                {plan.price}
-              </p>
-              <p className="text-[#A0A0A0] text-sm mt-2 font-light">
-                {plan.period}
-              </p>
-              {plan.sub && (
-                <p className="text-[#A0A0A0]/60 text-xs mt-1 font-light">
-                  {plan.sub}
-                </p>
+      {/* FACILITEITEN */}
+      <section className="py-24 px-6 bg-zinc-950 border-t border-gray-800">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-5xl font-black uppercase mb-12">{t.facilities.title}</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="border-b border-gray-800 pb-6">
+              <h3 className="text-2xl font-bold uppercase mb-3">{t.facilities.size}</h3>
+              <p className="text-gray-400 leading-relaxed">{t.facilities.sizeDesc}</p>
+            </div>
+            <div className="border-b border-gray-800 pb-6">
+              <h3 className="text-2xl font-bold uppercase mb-3">{t.facilities.strength}</h3>
+              <p className="text-gray-400 leading-relaxed">{t.facilities.strengthDesc}</p>
+            </div>
+            <div className="border-b border-gray-800 pb-6">
+              <h3 className="text-2xl font-bold uppercase mb-3">{t.facilities.bar}</h3>
+              <p className="text-gray-400 leading-relaxed">{t.facilities.barDesc}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* TARIEVEN */}
+      <section id="tarieven" className="py-24 px-6 border-t border-gray-800">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-5xl md:text-6xl font-black uppercase leading-none mb-16">{t.pricing.title}</h2>
+          
+          {/* Proefles */}
+          <div className="border border-gray-800 inline-block px-12 py-8 mb-12">
+            <p className="text-gray-500 text-sm uppercase tracking-widest mb-2">{t.pricing.trial}</p>
+            <p className="text-5xl font-black mb-2">{t.pricing.trialPrice}</p>
+            <p className="text-gray-400 text-sm">{t.pricing.trialDesc}</p>
+          </div>
+
+          {/* Abonnementen */}
+          <div className="grid md:grid-cols-4 gap-4 text-sm">
+            <div className="p-4 border-b border-gray-800 font-bold uppercase text-gray-500 tracking-widest">{t.pricing.month}</div>
+            <div className="p-4 border-b border-gray-800 font-bold uppercase text-gray-500 tracking-widest">{t.pricing.months6}</div>
+            <div className="p-4 border-b border-gray-800 font-bold uppercase text-gray-500 tracking-widest">{t.pricing.months12}</div>
+            <div className="p-4 border-b border-gray-800 font-bold uppercase text-gray-500 tracking-widest">&nbsp;</div>
+
+            <div className="p-4 text-2xl font-black">€75</div>
+            <div className="p-4 text-2xl font-black">€72,50</div>
+            <div className="p-4 text-2xl font-black">€70</div>
+            <div className="p-4 text-gray-400 text-xs uppercase flex items-center justify-end">{t.pricing.week2}</div>
+
+            <div className="p-4 text-2xl font-black">€85</div>
+            <div className="p-4 text-2xl font-black">€82,50</div>
+            <div className="p-4 text-2xl font-black">€80</div>
+            <div className="p-4 text-gray-400 text-xs uppercase flex items-center justify-end">{t.pricing.week3}</div>
+
+            <div className="p-4 text-2xl font-black bg-white/5">€95</div>
+            <div className="p-4 text-2xl font-black bg-white/5">€92,50</div>
+            <div className="p-4 text-2xl font-black bg-white/5">€90</div>
+            <div className="p-4 text-white text-xs uppercase flex items-center justify-end font-bold">{t.pricing.unlimited}</div>
+
+            <div className="p-4 text-2xl font-black">€192,50</div>
+            <div className="p-4 text-2xl font-black text-gray-600">-</div>
+            <div className="p-4 text-2xl font-black text-gray-600">-</div>
+            <div className="p-4 text-gray-400 text-xs uppercase flex items-center justify-end">{t.pricing.unlimitedPt}</div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* FAQ (ACORDEÓN) */}
+      <section id="faq" className="py-24 px-6 bg-zinc-950 border-t border-gray-800">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-5xl md:text-6xl font-black uppercase leading-none mb-12">{t.faq.title}</h2>
+          {Array.from({length: 4}).map((_, i) => (
+            <div key={i} className="border-b border-gray-800">
+              <button onClick={() => toggleFaq(i)} className="w-full flex justify-between items-center py-6 text-left hover:pl-2 transition-all">
+                <h3 className="text-xl font-bold">{t.faq[`q${i+1}` as keyof typeof t.faq].q}</h3>
+                <span className="text-2xl text-gray-500">{openFaq === i ? '−' : '+'}</span>
+              </button>
+              {openFaq === i && (
+                <div className="pb-6 text-gray-400 leading-relaxed">
+                  {t.faq[`q${i+1}` as keyof typeof t.faq].a}
+                </div>
               )}
-            </motion.div>
+            </div>
           ))}
         </div>
+      </section>
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="text-[#A0A0A0] text-sm font-light mt-10 text-center md:text-left"
-        >
-          Youth Subscription: €30 / month
-        </motion.p>
-      </div>
-    </section>
-  );
-}
+      {/* FOOTER */}
+      <footer className="py-16 px-6 border-t border-gray-800">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12">
+          <div>
+            <h4 className="font-bold uppercase tracking-widest mb-4 text-sm">{t.footer.location}</h4>
+            <p className="text-gray-400 text-sm mb-2">{t.footer.address}</p>
+            <p className="text-gray-400 text-sm">{t.footer.parking}</p>
+          </div>
+          <div>
+            <h4 className="font-bold uppercase tracking-widest mb-4 text-sm">{t.footer.hours}</h4>
+            <p className="text-gray-400 text-sm">{t.footer.hoursDesc}</p>
+          </div>
+        </div>
+        <div className="max-w-6xl mx-auto mt-12 pt-8 border-t border-gray-800 text-center text-gray-600 text-xs uppercase tracking-widest">
+          &copy; 2024 Leth's Muay Thai Gym. All Rights Reserved.
+        </div>
+      </footer>
 
-/* ───────────────────────────────────────────────
-   FOOTER
-   ─────────────────────────────────────────────── */
-function Footer() {
-  return (
-    <footer className="w-full bg-black border-t border-white/20">
-      <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p className="text-[#A0A0A0] text-sm font-light text-center sm:text-left">
-          Ms. van Riemsdijkeweg 59, 1033 RC Amsterdam
-        </p>
-        <a
-          href="https://maps.google.com/?q=Ms.+van+Riemsdijkeweg+59+1033+RC+Amsterdam"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-white text-sm tracking-[0.15em] uppercase font-light hover:opacity-70 transition-opacity duration-300 group"
-        >
-          Get Directions
-          <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-        </a>
-      </div>
-    </footer>
-  );
-}
-
-/* ───────────────────────────────────────────────
-   PAGE
-   ─────────────────────────────────────────────── */
-export default function Home() {
-  return (
-    <div className="min-h-screen flex flex-col bg-black">
-      <HeroSection />
-      <KruRobertSection />
-      <ClassesSection />
-      <PricingSection />
-      <Footer />
-    </div>
+    </main>
   );
 }
