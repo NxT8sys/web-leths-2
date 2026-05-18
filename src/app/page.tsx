@@ -174,7 +174,7 @@ function KruRobertSection() {
         >
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat grayscale"
-            style={{ backgroundImage: "url('/kru-robert.jpg')" }}
+            style={{ backgroundImage: "url('/kru.png')" }}
           />
           <div className="absolute inset-0 bg-black/20" />
         </motion.div>
