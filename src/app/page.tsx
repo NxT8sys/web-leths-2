@@ -173,7 +173,7 @@ function KruRobertSection() {
           className="relative w-full lg:w-1/2 h-1/2 lg:h-full overflow-hidden"
         >
           <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat grayscale"
+            className="absolute inset-0 bg-cover bg-top bg-no-repeat grayscale"
             style={{ backgroundImage: "url('/kru.png')" }}
           />
           <div className="absolute inset-0 bg-black/20" />
